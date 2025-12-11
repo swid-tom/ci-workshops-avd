@@ -193,6 +193,13 @@ router_bgp:
     password: Q4fqtbqcZ7oQuKfuWtNGRQ==
     send_community: all
     maximum_routes: 0
+  - name: EVPN-OVERLAY-CORE
+    type: evpn
+    update_source: Loopback0
+    bfd: true
+    ebgp_multihop: 15
+    send_community: all
+    maximum_routes: 0
   neighbors:
   - ip_address: 10.252.2.9
     peer_group: MLAG-IPv4-UNDERLAY-PEER
@@ -218,6 +225,11 @@ router_bgp:
     remote_as: '65200'
     peer: s2-spine2
     description: s2-spine2_Loopback0
+  - ip_address: 10.250.1.7
+    peer_group: EVPN-OVERLAY-CORE
+    remote_as: '65103'
+    peer: s1-brdr1
+    description: s1-brdr1
   - ip_address: 172.16.255.0
     peer_group: IPv4-UNDERLAY-PEERS
     remote_as: '65103'
@@ -228,7 +240,14 @@ router_bgp:
       enabled: true
       route_map: RM-CONN-2-BGP
   address_family_evpn:
+    neighbor_default:
+      next_hop_self_received_evpn_routes:
+        enable: true
+        inter_domain: true
     peer_groups:
+    - name: EVPN-OVERLAY-CORE
+      activate: true
+      domain_remote: true
     - name: EVPN-OVERLAY-PEERS
       activate: true
   address_family_ipv4:
@@ -238,6 +257,8 @@ router_bgp:
     - name: IPv4-UNDERLAY-PEERS
       activate: true
     - name: EVPN-OVERLAY-PEERS
+      activate: false
+    - name: EVPN-OVERLAY-CORE
       activate: false
 service_routing_protocols_model: multi-agent
 spanning_tree:
